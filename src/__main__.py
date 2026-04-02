@@ -2,6 +2,9 @@
 import argparse
 import os
 import sys
+import json
+from .models import FunctionDefinition, FunctionCall, PromptInput
+
 class ArgumentsError(Exception):
     ...
 
@@ -29,8 +32,18 @@ def main() -> None:
     args = parser.parse_args()
     try:
         arguments_checker(args)
-    except Exception as e:
+    except ArgumentsError as e:
         print(f"Error: {e}")
+        sys.exit(1)
+
+    try:
+        with open(args.functions_definition) as f:
+            functions = [FunctionDefinition(**item) for item in json.load(f)]
+        
+        with open(args.input) as f:
+            prompts = [PromptInput(**item) for item in json.load(f)]
+    except Exception as e:
+        print(f"Error loading files: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
